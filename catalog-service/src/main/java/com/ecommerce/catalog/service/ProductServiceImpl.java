@@ -1,14 +1,19 @@
 package com.ecommerce.catalog.service;
 
 import com.ecommerce.catalog.dto.ProductDTO;
+import com.ecommerce.catalog.dto.ProductFilter;
 import com.ecommerce.catalog.entity.Category;
 import com.ecommerce.catalog.entity.Product;
 import com.ecommerce.catalog.exception.ProductNotFoundException;
 import com.ecommerce.catalog.mapper.ProductMapper;
 import com.ecommerce.catalog.repository.CategoryRepository;
 import com.ecommerce.catalog.repository.ProductRepository;
+import com.ecommerce.catalog.specification.ProductSpecification;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -65,9 +70,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDTO> findAll() {
-        List<Product> products = productRepository.findAll();
-        return products.stream().map(product -> productMapper.toDTO(product)).collect(Collectors.toList());
+    public Page<ProductDTO> findAll(ProductFilter productFilter, Pageable pageable) {
+        // find in database all products which describes the conditions(filters)
+        Specification<Product> specification = ProductSpecification.withFilters(productFilter);
+
+        return productRepository.findAll(specification,pageable).map(productMapper::toDTO);
+
+        //List<Product> products = productRepository.findAll();
+        //return products.stream().map(product -> productMapper.toDTO(product)).collect(Collectors.toList());
     }
 
     @Override

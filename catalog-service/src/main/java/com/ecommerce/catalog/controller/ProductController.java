@@ -1,11 +1,14 @@
 package com.ecommerce.catalog.controller;
 
 import com.ecommerce.catalog.dto.ProductDTO;
+import com.ecommerce.catalog.dto.ProductFilter;
 import com.ecommerce.catalog.entity.Product;
 import com.ecommerce.catalog.service.ProductService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +25,8 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public List<ProductDTO> findAll() {
-        return productService.findAll();
+    public Page<ProductDTO> findAll(ProductFilter productFilter, Pageable pageable) {
+        return productService.findAll(productFilter,pageable);
     }
 
     @GetMapping("/{id}")
