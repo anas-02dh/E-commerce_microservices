@@ -1,0 +1,39 @@
+services:
+
+  customer-postgres:
+    image: postgres:17
+    container_name: customer-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: customer_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+
+    ports:
+      - "5434:5432"
+
+    volumes:
+      - customer_postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - ecommerce-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: customer-keycloak
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+
+
+
+volumes:
+  customer_postgres_data:
+
+networks:
+  ecommerce-network:
+    driver: bridge
