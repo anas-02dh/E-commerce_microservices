@@ -2,11 +2,14 @@ package com.ecommerce.customer.service;
 
 import com.ecommerce.customer.dto.CustomerDTO;
 import com.ecommerce.customer.entity.Customer;
+import com.ecommerce.customer.exception.CustomerAlreadyExistsException;
 import com.ecommerce.customer.exception.CustomerNotFoundException;
 import com.ecommerce.customer.mapper.CustomerMapper;
 import com.ecommerce.customer.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,8 +28,20 @@ public class CustomerServiceImpl implements CustomerService{
 
 
     @Override
-    public CustomerDTO create(CustomerDTO customerDTO) {
+    public CustomerDTO create(CustomerDTO customerDTO, Jwt jwt
+    ) {
         Customer customer = mapper.toEntity(customerDTO);
+
+        String keycloakUserId = jwt.getSubject();
+
+        if(customerRepository.existsByKeycloakUserId(keycloakUserId)) {
+            throw new CustomerAlreadyExistsException(
+                    "Customer already exists for this Keycloak user"
+            );
+        }
+
+        customer.setKeycloakUserId(keycloakUserId);
+
         Customer savedCustomer = customerRepository.save(customer);
 
         return mapper.toDTO(savedCustomer);

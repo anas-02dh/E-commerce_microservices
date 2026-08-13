@@ -11,5 +11,6 @@ import java.util.UUID;
  * @author {ANAS DR}
  **/
 public interface CustomerRepository extends JpaRepository<Customer, UUID> {
+    boolean existsByKeycloakUserId(String keycloakUserId);
     Optional<Customer> findByKeycloakUserId(String keycloakUserId);
 }

@@ -5,6 +5,9 @@ import com.ecommerce.customer.entity.Customer;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import com.ecommerce.customer.service.CustomerService;
 
@@ -34,8 +37,8 @@ public class CustomerController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CustomerDTO create(@Valid @RequestBody CustomerDTO customerDTO) {
-        return customerService.create(customerDTO);
+    public CustomerDTO create(@Valid @RequestBody CustomerDTO customerDTO,  @AuthenticationPrincipal Jwt jwt) {
+        return customerService.create(customerDTO, jwt);
     }
 
     @PutMapping("/{id}")
