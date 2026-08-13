@@ -27,11 +27,14 @@ public class SecurityConfig {
                         "/v3/api-docs/**"
                 ).permitAll()
                         // Customer API requires authentication
+
+                                .requestMatchers("/api/customers/me")
+                                .hasAnyRole("CUSTOMER", "ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/api/customers/**")
                                 .hasAnyRole("CUSTOMER", "ADMIN")
 
                                 .requestMatchers(HttpMethod.POST, "/api/customers")
-                                .hasRole("CUSTOMER")
+                                .hasAnyRole("CUSTOMER", "ADMIN")
 
                                 .requestMatchers(HttpMethod.PUT, "/api/customers/**")
                                 .hasRole("CUSTOMER")

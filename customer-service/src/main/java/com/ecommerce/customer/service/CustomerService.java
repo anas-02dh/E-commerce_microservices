@@ -12,8 +12,9 @@ import java.util.UUID;
  **/
 public interface CustomerService {
     CustomerDTO create(CustomerDTO customerDTO, Jwt jwt);
-    CustomerDTO update(UUID id, CustomerDTO customerDTO);
+    CustomerDTO update(UUID id, CustomerDTO customerDTO, String keycloakUserId);
     List<CustomerDTO> findAll();
     CustomerDTO findById(UUID id);
     void delete(UUID id);
+    CustomerDTO findMyCustomer(String keycloakUserId);
 }

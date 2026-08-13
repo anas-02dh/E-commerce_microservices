@@ -8,6 +8,7 @@ import com.ecommerce.customer.mapper.CustomerMapper;
 import com.ecommerce.customer.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -47,14 +48,21 @@ public class CustomerServiceImpl implements CustomerService{
         return mapper.toDTO(savedCustomer);
     }
 
+
+
     @Override
-    public CustomerDTO update(UUID id, CustomerDTO customerDTO) {
+    public CustomerDTO update(UUID id, CustomerDTO customerDTO, String keycloakUserId) {
         Customer customer = customerRepository.findById(id).orElseThrow(() ->
                 new CustomerNotFoundException(
                         "Customer not found with id: " + id
                 )
         );
 
+        if (!customer.getKeycloakUserId().equals(keycloakUserId)) {
+            throw new AccessDeniedException(
+                    "You cannot modify another customer's account"
+            );
+        }
 
         customer.setFirstName(customerDTO.getFirstName());
         customer.setLastName(customerDTO.getLastName());
@@ -109,5 +117,17 @@ public class CustomerServiceImpl implements CustomerService{
                         "Customer not found with id: " + id
                 ));
         customerRepository.delete(customer);
+    }
+
+    @Override
+    public CustomerDTO findMyCustomer(String keycloakUserId) {
+
+        Customer customer= customerRepository.findByKeycloakUserId(keycloakUserId).orElseThrow(() ->
+                new CustomerNotFoundException(
+                        "Customer not found with keyCloakUserId: " +keycloakUserId
+                        ));
+
+
+        return mapper.toDTO(customer);
     }
 }

@@ -30,6 +30,11 @@ public class CustomerController {
         return customerService.findAll();
     }
 
+    @GetMapping("/me")
+    CustomerDTO findMyCustomer(@AuthenticationPrincipal Jwt jwt){
+        return customerService.findMyCustomer(jwt.getSubject());
+    }
+
     @GetMapping("/{id}")
     public CustomerDTO findById(@PathVariable UUID id){
         return customerService.findById(id);
@@ -42,8 +47,8 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public CustomerDTO update(@PathVariable UUID id, @Valid @RequestBody CustomerDTO customerDTO){
-        return customerService.update(id,customerDTO);
+    public CustomerDTO update(@PathVariable UUID id, @Valid @RequestBody CustomerDTO customerDTO, @AuthenticationPrincipal Jwt jwt){
+        return customerService.update(id,customerDTO, jwt.getSubject());
     }
 
     @DeleteMapping("/{id}")
