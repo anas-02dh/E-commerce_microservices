@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: order-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5435/order_db
+    username: admin
+    password: admin
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+application:
+  config:
+    catalog-url: http://localhost:8081
+    customer-url: http://localhost:8082
+
+server:
+  port: 8083
