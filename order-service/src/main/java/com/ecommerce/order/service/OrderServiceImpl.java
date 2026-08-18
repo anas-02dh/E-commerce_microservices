@@ -6,8 +6,10 @@ import com.ecommerce.order.dto.*;
 import com.ecommerce.order.entity.Order;
 import com.ecommerce.order.entity.OrderLine;
 import com.ecommerce.order.entity.OrderStatus;
+import com.ecommerce.order.event.OrderCreatedEvent;
 import com.ecommerce.order.exception.OrderNotFoundException;
 import com.ecommerce.order.mapper.OrderMapper;
+import com.ecommerce.order.producer.OrderEventProducer;
 import com.ecommerce.order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper mapper;
     private final CatalogClient catalogClient;
     private final CustomerClient customerClient;
+    private final OrderEventProducer orderEventProducer;
 
     private String generateReference() {
         return "REF-" + UUID.randomUUID().toString().substring(0,0).toUpperCase();
@@ -69,8 +72,18 @@ public class OrderServiceImpl implements OrderService {
 
         order.setTotalAmount(total);
 
+        Order orderSaved = orderRepository.save(order);
+        OrderCreatedEvent event = OrderCreatedEvent.builder()
+                .orderId(orderSaved.getId())
+                .reference(orderSaved.getReference())
+                .customerId(orderSaved.getCustomerId())
+                .totalAmount(orderSaved.getTotalAmount())
+                .build();
 
-        return mapper.toResponse(orderRepository.save(order));
+        orderEventProducer.sendOrderCreatedEvent(event);
+
+
+        return mapper.toResponse(orderSaved);
     }
 
     @Override
