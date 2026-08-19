@@ -3,7 +3,7 @@ spring:
     name: notification-service
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
     consumer:
       group-id: notification-service
@@ -13,6 +13,10 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 
       properties:
-        spring.json.trusted.packages: "com.ecommerce.order.event"
-        spring.json.value.default.type: "com.ecommerce.notification.event.OrderCreatedEvent"
-        spring.json.use.type.headers: false
+        spring.json.trusted.packages: "*"
+        spring.json.type.mapping: >
+          com.ecommerce.payment.event.PaymentCompletedEvent:com.ecommerce.notification.event.PaymentCompletedEvent,
+          com.ecommerce.order.event.OrderCreatedEvent:com.ecommerce.notification.event.OrderCreatedEvent
+
+server:
+  port: 8085
