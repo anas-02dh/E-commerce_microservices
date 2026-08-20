@@ -1,0 +1,52 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: api-gateway
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/ecommerce
+
+  cloud:
+    gateway:
+      routes:
+
+        - id: catalog-service
+          uri: lb://catalog-service
+          predicates:
+            - Path=/api/products,/api/products/**,/api/categories,/api/categories/**
+
+        - id: customer-service
+          uri: lb://customer-service
+          predicates:
+            - Path=/api/customers,/api/customers/**
+
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders,/api/orders/**
+
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments,/api/payments/**
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications,/api/notifications/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
