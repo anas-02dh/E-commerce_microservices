@@ -1,5 +1,6 @@
 package com.ecommerce.order.client;
 
+import com.ecommerce.order.config.FeignClientConfig;
 import com.ecommerce.order.dto.ProductResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +13,8 @@ import java.util.UUID;
  **/
 @FeignClient(
         name = "catalog-service",
-        url = "${application.config.catalog-url}"
+        //url = "${application.config.catalog-url}",
+        configuration = FeignClientConfig .class
 )
 public interface CatalogClient {
 

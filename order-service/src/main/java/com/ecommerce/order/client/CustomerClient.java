@@ -13,7 +13,7 @@ import java.util.UUID;
  **/
 @FeignClient(
         name = "customer-service",
-        url = "${application.config.customer-url}",
+        //url = "${application.config.customer-url}",
         configuration = FeignClientConfig.class
 )
 

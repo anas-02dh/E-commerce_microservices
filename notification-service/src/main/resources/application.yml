@@ -19,4 +19,9 @@ spring:
           com.ecommerce.order.event.OrderCreatedEvent:com.ecommerce.notification.event.OrderCreatedEvent
 
 server:
-  port: 8085
+  port: 8086
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
