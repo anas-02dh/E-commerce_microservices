@@ -1,0 +1,57 @@
+name: Ecommerce Microservices CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build Discovery Server
+        working-directory: discovery-server
+        run: ./mvnw clean verify
+
+      - name: Build Catalog Service
+        working-directory: catalog-service
+        run: ./mvnw clean verify
+
+      - name: Build Customer Service
+        working-directory: customer-service
+        run: ./mvnw clean verify
+
+      - name: Build Order Service
+        working-directory: order-service
+        run: ./mvnw clean verify
+
+      - name: Build Payment Service
+        working-directory: payment-service
+        run: ./mvnw clean verify
+
+      - name: Build Notification Service
+        working-directory: notification-service
+        run: ./mvnw clean verify
+
+      - name: Build API Gateway
+        working-directory: api-gateway
+        run: ./mvnw clean verify

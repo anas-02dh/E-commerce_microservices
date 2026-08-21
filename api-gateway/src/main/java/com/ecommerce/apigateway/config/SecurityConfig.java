@@ -18,11 +18,37 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/actuator/**").permitAll()
-                        .anyExchange().authenticated()
+
+                        .pathMatchers("/actuator/**")
+                        .permitAll()
+
+                        // Catalog
+                        .pathMatchers("/api/products/**")
+                        .hasAnyRole("CUSTOMER", "ADMIN")
+
+                        // Customers
+                        .pathMatchers("/api/customers/**")
+                        .hasAnyRole("CUSTOMER", "ADMIN")
+
+                        // Create orders
+                        .pathMatchers("/api/orders")
+                        .hasRole("CUSTOMER")
+
+                        // Order management
+                        .pathMatchers("/api/orders/**")
+                        .hasAnyRole("CUSTOMER", "ADMIN")
+
+                        // Payments
+                        .pathMatchers("/api/payments/**")
+                        .hasAnyRole("CUSTOMER", "ADMIN")
+
+                        .anyExchange()
+                        .authenticated()
                 )
                 .oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(jwt -> {})
+                        oauth2.jwt(jwt ->
+                                    jwt.jwtAuthenticationConverter(new KeycloakJwtConverter())
+                        )
                 )
                 .build();
     }

@@ -1,5 +1,33 @@
 services:
 
+  # EUREKA
+  eureka-server:
+    build:
+      context: ./discovery-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - ecommerce-network
+
+  # KEYCLOAK
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: ecommerce-keycloak
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    networks:
+      - ecommerce-network
+
+  # KAFKA
   kafka:
     image: apache/kafka:4.0.0
     container_name: ecommerce-kafka
@@ -39,6 +67,102 @@ services:
     networks:
       - ecommerce-network
 
+  #Databases
+  catalog-postgres:
+    image: postgres:17
+    container_name: catalog-db
+    environment:
+      POSTGRES_DB: catalog_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5433:5432"
+    volumes:
+      - catalog_postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  customer-postgres:
+    image: postgres:17
+    container_name: customer-db
+    environment:
+      POSTGRES_DB: customer_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5434:5432"
+    volumes:
+      - customer_postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  order-postgres:
+    image: postgres:17
+    container_name: order-db
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5435:5432"
+    volumes:
+      - order_postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  payment-postgres:
+    image: postgres:17
+    container_name: payment-db
+    environment:
+      POSTGRES_DB: payment_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5436:5432"
+    volumes:
+      - payment_postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  notification-postgres:
+    image: postgres:17
+    container_name: notification-db
+    environment:
+      POSTGRES_DB: notification_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5437:5432"
+    volumes:
+      - notification_postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  #Services
+  catalog-service:
+    build:
+      context: ./catalog-service
+    container_name: catalog-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-server
+      - catalog-postgres
+    networks:
+      - ecommerce-network
+
+  customer-service:
+    build:
+      context: ./customer-service
+    container_name: customer-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - eureka-server
+      - customer-postgres
+      - keycloak
+    networks:
+      - ecommerce-network
 
   order-service:
     build:
@@ -88,7 +212,7 @@ services:
     container_name: notification-service
 
     ports:
-      - "8085:8085"
+      - "8086:8086"
 
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
@@ -99,6 +223,32 @@ services:
     networks:
       - ecommerce-network
 
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8090:8090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - eureka-server
+      - keycloak
+      - catalog-service
+      - customer-service
+      - order-service
+      - payment-service
+      - notification-service
+    networks:
+      - ecommerce-network
+
+volumes:
+  catalog_postgres_data:
+  customer_postgres_data:
+  order_postgres_data:
+  payment_postgres_data:
+  notification_postgres_data:
 
 networks:
   ecommerce-network:
